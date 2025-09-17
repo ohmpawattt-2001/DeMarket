@@ -1,0 +1,28 @@
+pragma solidity ^0.8.20;
+
+contract DeMarketAuction {
+    struct Auction {
+        address seller;
+        uint256 highestBid;
+        address highestBidder;
+        uint256 endTime;
+    }
+
+    mapping(uint256 => Auction) public auctions;
+
+    function startAuction(uint256 id, uint256 duration) external {
+        auctions[id] = Auction(msg.sender, 0, address(0), block.timestamp + duration);
+    }
+
+    function bid(uint256 id) external payable {
+        Auction storage a = auctions[id];
+        require(block.timestamp < a.endTime, "Auction ended");
+        require(msg.value > a.highestBid, "Low bid");
+
+        if (a.highestBidder != address(0)) {
+            payable(a.highestBidder).transfer(a.highestBid);
+        }
+        a.highestBid = msg.value;
+        a.highestBidder = msg.sender;
+    }
+}

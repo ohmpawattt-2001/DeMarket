@@ -1,0 +1,16 @@
+pragma solidity ^0.8.20;
+
+contract Escrow {
+    mapping(uint256 => address) public buyers;
+    mapping(uint256 => uint256) public deposits;
+
+    function lockFunds(uint256 itemId) external payable {
+        buyers[itemId] = msg.sender;
+        deposits[itemId] = msg.value;
+    }
+
+    function releaseFunds(uint256 itemId, address seller) external {
+        require(buyers[itemId] != address(0), "No buyer");
+        payable(seller).transfer(deposits[itemId]);
+    }
+}
